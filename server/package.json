@@ -1,0 +1,23 @@
+{
+  "name": "gridzone-server",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GridZone game server: authoritative simulation + sharded Monad relayer pool",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "16.4.7",
+    "express": "4.21.2",
+    "socket.io": "4.8.1",
+    "viem": "2.21.55"
+  },
+  "devDependencies": {
+    "socket.io-client": "4.8.1"
+  }
+}

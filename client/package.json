@@ -1,0 +1,20 @@
+{
+  "name": "gridzone-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "GridZone frontend: lobby, Phaser arena renderer and on-chain HUD",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "phaser": "3.87.0",
+    "socket.io-client": "4.8.1",
+    "viem": "2.21.55"
+  },
+  "devDependencies": {
+    "vite": "5.4.11"
+  }
+}

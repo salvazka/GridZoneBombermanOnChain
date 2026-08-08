@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GridZone — Bomberman Battle Royale on Monad</title>
+    <meta
+      name="description"
+      content="Classic Bomberman battle royale with instant on-chain stablecoin settlement on Monad. Every kill pays out in USDC."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- The lobby / landing screen. background.png is applied to this element. -->
+    <main id="lobby" class="screen lobby" aria-labelledby="lobby-title">
+      <div class="lobby__scrim" aria-hidden="true"></div>
+
+      <header class="lobby__top">
+        <div class="brand">
+          <span class="brand__mark" aria-hidden="true">M</span>
+          <span class="brand__text">GRID<span class="accent">ZONE</span></span>
+        </div>
+        <div class="net-pill" id="net-pill">
+          <span class="net-pill__dot" aria-hidden="true"></span>
+          <span id="net-label">Connecting…</span>
+        </div>
+      </header>
+
+      <section class="lobby__hero">
+        <h1 id="lobby-title" class="hero__title">
+          BOMBERMAN<br /><span class="accent">BATTLE ROYALE</span>
+        </h1>
+        <p class="hero__tag">
+          16 players. One grid. Every kill settles instantly in USDC on Monad.
+        </p>
+
+        <ul class="hero__stats" role="list">
+          <li><strong>$1.00</strong><span>Entry</span></li>
+          <li><strong>$0.80</strong><span>Your bounty</span></li>
+          <li><strong>80 / 20</strong><span>Kill split</span></li>
+          <li><strong>20×20</strong><span>Grid</span></li>
+        </ul>
+
+        <div class="wallet-card" id="wallet-card">
+          <div class="wallet-card__row" id="wallet-disconnected">
+            <button class="btn btn--primary" id="btn-connect" type="button">
+              Connect Wallet
+            </button>
+            <p class="hint" id="connect-hint">
+              Needs an EVM wallet. The network is added automatically.
+            </p>
+          </div>
+
+          <div class="wallet-card__body is-hidden" id="wallet-connected">
+            <div class="balances">
+              <div class="balance">
+                <span class="balance__label">Wallet</span>
+                <span class="balance__value mono" id="addr-label">—</span>
+              </div>
+              <div class="balance">
+                <span class="balance__label">USDC</span>
+                <span class="balance__value" id="usdc-label">—</span>
+              </div>
+              <div class="balance">
+                <span class="balance__label">MON</span>
+                <span class="balance__value" id="mon-label">—</span>
+              </div>
+            </div>
+
+            <div class="wallet-card__actions">
+              <button class="btn btn--ghost" id="btn-faucet" type="button">
+                Get Test USDC
+              </button>
+              <button class="btn btn--primary" id="btn-join" type="button">
+                Approve &amp; Join Match — $1
+              </button>
+            </div>
+
+            <p class="status" id="join-status" role="status" aria-live="polite"></p>
+          </div>
+        </div>
+
+        <div class="lobby__queue is-hidden" id="queue-panel">
+          <div class="queue__head">
+            <h2>Lobby</h2>
+            <span class="queue__count"><span id="queue-seated">0</span>/<span id="queue-cap">16</span></span>
+          </div>
+          <p class="queue__meta" id="queue-meta">Waiting for players…</p>
+          <ol class="queue__list" id="queue-list"></ol>
+          <p class="queue__chain mono" id="queue-chain"></p>
+        </div>
+      </section>
+
+      <footer class="lobby__foot">
+        <span class="mono" id="contract-label">—</span>
+        <span class="dim">Monad Testnet · MockUSDC has an open faucet · testnet value only</span>
+      </footer>
+    </main>
+
+    <!-- The match screen: Phaser canvas plus DOM HUD. -->
+    <main id="game" class="screen game is-hidden" aria-label="Match in progress">
+      <aside class="hud hud--left">
+        <div class="panel">
+          <h3 class="panel__title">Earnings</h3>
+          <p class="earnings" id="hud-earnings">+$0.00</p>
+          <p class="panel__sub">settled on Monad</p>
+        </div>
+
+        <div class="panel">
+          <h3 class="panel__title">Red Zone</h3>
+          <p class="ring-timer" id="hud-ring-timer">—</p>
+          <p class="panel__sub" id="hud-ring-label">grace period</p>
+        </div>
+
+        <div class="panel panel--grow">
+          <h3 class="panel__title">Alive <span class="dim" id="hud-alive-count"></span></h3>
+          <ol class="leaderboard" id="hud-leaderboard"></ol>
+        </div>
+      </aside>
+
+      <div class="stage">
+        <div class="stage__bar">
+          <span class="mono dim" id="hud-match-id">—</span>
+          <span class="mono dim" id="hud-tick"></span>
+        </div>
+        <div id="phaser-root" class="stage__canvas"></div>
+        <div class="stage__hint dim">
+          WASD / Arrows to move · Space to drop a bomb
+        </div>
+      </div>
+
+      <aside class="hud hud--right">
+        <div class="panel panel--grow">
+          <h3 class="panel__title">Settlement Feed</h3>
+          <ul class="feed" id="hud-feed"></ul>
+        </div>
+      </aside>
+
+      <div class="toasts" id="toasts" aria-live="polite"></div>
+    </main>
+
+    <!-- Post-match summary. -->
+    <main id="results" class="screen results is-hidden" aria-labelledby="results-title">
+      <div class="lobby__scrim" aria-hidden="true"></div>
+      <div class="results__card">
+        <h2 id="results-title" class="results__title">Match Over</h2>
+        <p class="results__winner" id="results-winner">—</p>
+        <dl class="results__grid" id="results-grid"></dl>
+        <p class="results__root mono" id="results-root"></p>
+        <div class="results__actions">
+          <a class="btn btn--ghost" id="results-log" href="#" target="_blank" rel="noopener">
+            View match log
+          </a>
+          <button class="btn btn--primary" id="btn-again" type="button">Back to Lobby</button>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
