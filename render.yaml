@@ -1,0 +1,33 @@
+# Render Blueprint — deploy the GridZone game server as a free Web Service.
+# https://render.com/docs/infrastructure-as-code
+services:
+  - type: web
+    name: gridzone-server
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: node src/index.js
+    envVars:
+      - key: PORT
+        value: "10000"
+      - key: OWNER_PRIVATE_KEY
+        sync: false
+      - key: CHAIN_ID
+        value: "10143"
+      - key: MONAD_RPC_URL
+        value: "https://testnet-rpc.monad.xyz"
+      - key: EXPLORER_BASE
+        value: "https://testnet.monadscan.com"
+      - key: ARENA_ADDRESS
+        value: "0x15A857eEe421D35Aa7397D83eaC68B3149B18D79"
+      - key: USDC_ADDRESS
+        value: "0x40556C6d729660aA1F24AA622Ea4BeBFdd28446a"
+      - key: CLIENT_ORIGIN
+        value: "*"
+      - key: RELAYER_COUNT
+        value: "4"
+      - key: RELAYER_SEED
+        value: "gridzone-relayer-pool-v1"
+      - key: BOT_SEED
+        value: "gridzone-bot-pool-v1"

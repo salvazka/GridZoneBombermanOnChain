@@ -69,7 +69,7 @@ function lighten(color, amt) {
 export class ArenaScene extends Phaser.Scene {
   constructor() {
     super("arena");
-    this.grid = 20;
+    this.grid = 19;
     this.tileSize = 36;
     this.tiles = null;
     this.snapshot = null;
@@ -90,7 +90,7 @@ export class ArenaScene extends Phaser.Scene {
   }
 
   init(data) {
-    this.grid = data?.grid ?? 20;
+    this.grid = data?.grid ?? 19;
     this.selfId = data?.selfId ?? null;
   }
 

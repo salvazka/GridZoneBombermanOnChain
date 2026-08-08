@@ -10,6 +10,7 @@ import {
   BASE_SPEED,
   SPEED_STEP,
   MAX_SPEED,
+  BOT_SPEED_MULTIPLIER,
   PLAYER_SIZE,
   BASE_BOMBS,
   MAX_BOMBS,
@@ -100,7 +101,12 @@ export class Match extends EventEmitter {
       earnings: 0n,
       maxBombs: BASE_BOMBS,
       blastRadius: BASE_BLAST,
-      speed: BASE_SPEED,
+      // Demo mode: bots start and stay slower than a human player (PRD
+      // constants.js BOT_SPEED_MULTIPLIER), so a presenter can reliably catch
+      // and eliminate one on camera. maxSpeed caps how far a speed power-up
+      // can push a bot, so picking one up never lets a bot outrun a human.
+      speed: BASE_SPEED * (isBot ? BOT_SPEED_MULTIPLIER : 1),
+      maxSpeed: MAX_SPEED * (isBot ? BOT_SPEED_MULTIPLIER : 1),
       activeBombs: 0,
       input: { up: false, down: false, left: false, right: false },
       wantBomb: false,
@@ -188,7 +194,8 @@ export class Match extends EventEmitter {
     this._placeBombs(now);
     this._detonate(now, deaths);
     this._expireFlames(now);
-    this._applyRedZone(now, deaths);
+    this._collapseNextRing(now, deaths);
+    this._checkRedZoneDeaths(deaths);
     this._checkFlameDeaths(now, deaths);
 
     if (deaths.length > 0) {
@@ -379,7 +386,7 @@ export class Match extends EventEmitter {
 
       if (pu.type === POWERUP.EXTRA_BOMB) p.maxBombs = Math.min(MAX_BOMBS, p.maxBombs + 1);
       else if (pu.type === POWERUP.BLAST_RADIUS) p.blastRadius = Math.min(MAX_BLAST, p.blastRadius + 1);
-      else if (pu.type === POWERUP.SPEED) p.speed = Math.min(MAX_SPEED, p.speed + SPEED_STEP);
+      else if (pu.type === POWERUP.SPEED) p.speed = Math.min(p.maxSpeed, p.speed + SPEED_STEP);
 
       this.log.append("powerup", { playerId: p.id, type: pu.type, x: pu.x, y: pu.y, tick: this.tick });
     }
@@ -415,11 +422,19 @@ export class Match extends EventEmitter {
     }
   }
 
-  _applyRedZone(now, deaths) {
+  /** Flips the next ring's tiles to COLLAPSED on schedule. Does not itself kill
+   *  anyone — see _checkRedZoneDeaths, which runs every tick and is what
+   *  actually enforces that standing on a collapsed tile is lethal. */
+  _collapseNextRing(now, deaths) {
     if (this.nextShrinkAt === null || now < this.nextShrinkAt) return;
 
     const ring = this.safeRing;
-    const maxRing = Math.floor(GRID / 2) - 1;
+    // The highest ring index reachable on this grid, i.e. the ring containing
+    // the exact centre. For an odd GRID (see constants.js) that centre is a
+    // single tile at ((GRID-1)/2, (GRID-1)/2) with ringOf() == (GRID-1)/2; for
+    // an even GRID it's the 2x2 block sharing that same ring index.
+    // floor((GRID-1)/2) is the correct last ring for both odd and even grids.
+    const maxRing = Math.floor((GRID - 1) / 2);
     if (ring > maxRing) {
       this.nextShrinkAt = null;
       return;
@@ -442,11 +457,27 @@ export class Match extends EventEmitter {
     this.log.append("ring_collapsed", { ring, tick: this.tick });
     this.emit("mapUpdate", { collapsed, ring });
 
-    // Anyone standing on the ring dies as an environment death: no killer, so
-    // the whole bounty rolls into the jackpot.
+    // Anyone standing on the ring the instant it collapses dies right away,
+    // same as before. _checkRedZoneDeaths below covers every other tick, so
+    // this call is only an optimisation to kill on the same tick as the
+    // collapse rather than waiting one tick for the generic check.
+    this._checkRedZoneDeaths(deaths);
+  }
+
+  /**
+   * Kills any living player standing on an already-collapsed tile. This must
+   * run every tick, not only at the moment a ring collapses: a player who is
+   * elsewhere when ring N collapses and only walks onto it later (or is still
+   * mid-collision-resolution there next tick) was previously never re-checked
+   * once _applyRedZone's one-shot pass for that ring had already run, making
+   * the red zone effectively non-lethal for anyone but the exact tick of
+   * collapse. Collapsed tiles are deliberately left walkable (see arena.js
+   * isSolid) so this check, not a wall, is what makes them lethal.
+   */
+  _checkRedZoneDeaths(deaths) {
     for (const p of this.players.values()) {
       if (!p.alive) continue;
-      if (ringOf(Math.floor(p.x), Math.floor(p.y)) <= ring) {
+      if (tileAt(this.tiles, Math.floor(p.x), Math.floor(p.y)) === TILE.COLLAPSED) {
         this._killPlayer(p, null, DEATH.ENVIRONMENT, deaths);
       }
     }

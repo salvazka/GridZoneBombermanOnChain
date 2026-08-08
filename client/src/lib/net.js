@@ -1,9 +1,20 @@
 import { io } from "socket.io-client";
 
-/** Socket wrapper. Same-origin because Vite proxies /socket.io to the server. */
+/**
+ * The server URL. In development, Vite proxies /api and /socket.io to
+ * localhost:3001, so an empty string (same-origin) works. In production the
+ * client is a static site on Vercel and the server lives on a different domain
+ * (e.g. Render), so the full URL must be specified via the VITE_SERVER_URL env
+ * variable at build time.
+ */
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "";
+
+/** Socket wrapper. */
 export class Net {
   constructor() {
-    this.socket = io({ transports: ["websocket", "polling"], autoConnect: true });
+    this.socket = SERVER_URL
+      ? io(SERVER_URL, { transports: ["websocket", "polling"], autoConnect: true })
+      : io({ transports: ["websocket", "polling"], autoConnect: true });
     this.socketId = null;
     this._ready = new Promise((resolve) => {
       this.socket.on("hello", ({ socketId }) => {
@@ -41,13 +52,15 @@ export class Net {
 }
 
 export async function fetchJson(url, options) {
-  const res = await fetch(url, options);
+  // Prefix relative URLs with the server base when deployed cross-origin.
+  const fullUrl = url.startsWith("/") && SERVER_URL ? `${SERVER_URL}${url}` : url;
+  const res = await fetch(fullUrl, options);
   const text = await res.text();
   let body;
   try {
     body = text ? JSON.parse(text) : {};
   } catch {
-    throw new Error(`Unexpected response from ${url}: ${text.slice(0, 120)}`);
+    throw new Error(`Unexpected response from ${fullUrl}: ${text.slice(0, 120)}`);
   }
   if (!res.ok) throw new Error(body.error ?? `${res.status} ${res.statusText}`);
   return body;

@@ -1,8 +1,16 @@
 // Tuning values for the simulation. Every number here traces back to a
 // decision recorded in the PRD; see the reference in each comment.
 
-/** Arena is 20x20 tiles (PRD §3.1). */
-export const GRID = 20;
+/**
+ * Arena is 19x19 tiles. An odd size is deliberate: the red zone (see
+ * _applyRedZone in match.js) collapses one full ring at a time counted inward
+ * from the border, and on an odd grid that sequence converges on exactly one
+ * walkable centre tile rather than a leftover 2x2 block. That single-point
+ * convergence is what makes the shrink look symmetric as it closes in,
+ * instead of visibly favouring one side once only a small block is left.
+ * PRD §3.1 originally specified 20x20; this intentionally deviates from it.
+ */
+export const GRID = 19;
 
 /** Server tick rate. PRD §9.5: 20-30Hz with client interpolation is the right
  *  target for a discrete-state grid game; 60 FPS is a client render metric. */
@@ -30,6 +38,14 @@ export const FLAME_DURATION_MS = 500;
 export const BASE_SPEED = 3.6;
 export const SPEED_STEP = 0.9;
 export const MAX_SPEED = 7.2;
+
+/**
+ * Demo mode: bots move at a fraction of a human's speed so a presenter can
+ * reliably chase one down and land a kill on camera, instead of the outcome
+ * depending on luck. Human players are completely unaffected — this only
+ * scales bot speed in Match.addPlayer. Set to 1 to restore equal-speed bots.
+ */
+export const BOT_SPEED_MULTIPLIER = 0.55;
 
 /** Player collision box, in tiles. Slightly under 1 so corners are forgiving. */
 export const PLAYER_SIZE = 0.72;

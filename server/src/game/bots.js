@@ -12,7 +12,13 @@ import { tileAt, ringOf, isSolid, blocksBlast } from "./arena.js";
  * good directions.
  */
 
-const DECISION_INTERVAL_MS = 140;
+// Demo mode: bots re-decide (re-plan escapes, notice danger, retarget) more
+// slowly than the original 140ms, on top of their reduced movement speed
+// (constants.js BOT_SPEED_MULTIPLIER). A slower reaction time means a bot
+// closing in on a human takes visibly longer to react to an incoming bomb,
+// which is what actually makes it easy to land an on-camera elimination
+// rather than just easy to outrun.
+const DECISION_INTERVAL_MS = 320;
 
 const DIRS = [
   { dx: 0, dy: -1, key: "up" },

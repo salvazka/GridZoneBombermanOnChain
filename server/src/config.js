@@ -31,7 +31,7 @@ function required(name, value) {
 
 export const config = {
   port: Number(process.env.PORT ?? 3001),
-  clientOrigin: process.env.CLIENT_ORIGIN ?? "http://localhost:5173",
+  clientOrigin: process.env.CLIENT_ORIGIN ?? "*",
 
   chainId: CHAIN_ID,
   rpcUrl: process.env.MONAD_RPC_URL ?? "https://testnet-rpc.monad.xyz",

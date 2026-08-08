@@ -33,7 +33,7 @@ Setiap kill memicu transfer nilai nyata ke wallet pemenang tanpa mengganggu alur
 
 ### 3.1 Arena & Rules
 
-- **Grid Size:** 20×20 tile.
+- **Grid Size:** 19×19 tile (direvisi dari 20×20; ukuran ganjil dipilih agar Red Zone menyusut simetris dan berakhir tepat di satu ubin tengah, bukan blok 2×2 sisa yang membuat shrink terlihat berat sebelah).
 - **Jumlah Pemain:** **16 pemain per lobby** untuk MVP (lihat §9.1 kenapa 32 pemain di grid ini tidak layak tanpa memperbesar grid).
 - **Objektif:** Bertahan hidup hingga menjadi Last Man Standing.
 - **Grace Period:** 30–45 detik pertama tanpa shrink, agar pemain punya waktu farming power-up sebelum tekanan dimulai.
@@ -265,9 +265,9 @@ v1 menargetkan "100% unit test coverage", yang untuk contract yang memindahkan u
 
 ### 9.1 Kepadatan Grid vs Jumlah Pemain
 
-Grid 20×20 = 400 tile. Setelah hard block + soft block (~50% area khas Bomberman), walkable area ≈ 200 tile. Dengan 32 pemain → ~6 tile/pemain, jauh lebih padat dari rasio klasik Bomberman (15×13 untuk 4 pemain ≈ 48 tile/pemain). Ini menyebabkan spawn campers dan kematian beruntun di 10 detik pertama.
+Grid 19×19 = 361 tile. Setelah hard block + soft block (~50% area khas Bomberman), walkable area ≈ 180 tile. Dengan 32 pemain → ~5.6 tile/pemain, jauh lebih padat dari rasio klasik Bomberman (15×13 untuk 4 pemain ≈ 48 tile/pemain). Ini menyebabkan spawn campers dan kematian beruntun di 10 detik pertama.
 
-**Keputusan MVP:** 16 pemain di grid 20×20 (~12.5 tile/pemain). Opsi masa depan: naikkan grid ke 25×25 jika ingin tetap 32 pemain.
+**Keputusan MVP:** 16 pemain di grid 19×19 (~11.3 tile/pemain). Opsi masa depan: naikkan grid ke 25×25 jika ingin tetap 32 pemain.
 
 ### 9.2 Red Zone Timing
 
