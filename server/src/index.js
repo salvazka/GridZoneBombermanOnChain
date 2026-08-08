@@ -26,6 +26,24 @@ const matchmaker = new Matchmaker(io);
 // HTTP API
 // ---------------------------------------------------------------------
 
+/**
+ * Root route. This server is an API + websocket backend, not the site itself
+ * (the Phaser client is a separate static build), so hitting / used to return
+ * Express's bare "Cannot GET /" — indistinguishable from a broken deploy when
+ * you open the generated Railway/Render URL in a browser. This returns a small
+ * status document instead, so the URL is self-explaining.
+ */
+app.get("/", (_req, res) => {
+  res.json({
+    service: "gridzone-server",
+    status: "ok",
+    note: "API + websocket backend. The playable client is a separate static site.",
+    endpoints: ["/api/health", "/api/config", "/api/settlements", "/api/match/:matchId/log"],
+    chainId: config.chainId,
+    arenaAddress: config.arenaAddress,
+  });
+});
+
 /** Everything the client needs to talk to the chain. Served from here so the
  *  frontend never hardcodes an address that could drift from the deployment. */
 app.get("/api/config", (_req, res) => {
