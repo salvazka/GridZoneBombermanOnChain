@@ -1,0 +1,13 @@
+**/node_modules
+client
+contracts/cache
+contracts/out
+contracts/broadcast
+contracts/lib
+agent
+.agents
+.claude
+.git
+**/.env
+**/.env.*
+!**/.env.example
