@@ -4,16 +4,22 @@
   "private": true,
   "description": "GridZone - Bomberman battle royale with instant on-chain USDC settlement on Monad",
   "scripts": {
-    "postinstall": "npm --prefix server install --omit=dev",
     "install:all": "npm --prefix server install && npm --prefix client install",
-    "build": "npm --prefix server install --omit=dev",
-    "start": "cd server && node src/index.js",
+    "start": "node server/src/index.js",
     "dev": "concurrently -n server,client -c magenta,cyan \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
     "start:server": "npm --prefix server start",
     "build:client": "npm --prefix client run build",
     "abis": "node contracts/gen-abis.mjs"
+  },
+  "//deps": "The server's runtime dependencies are duplicated here on purpose. PaaS platforms (Railway, Render) run a single `npm install` at the repo root and then `npm start`, without reliably running a nested install for server/. Node's ESM resolver walks up from server/src/index.js and finds these in the root node_modules/, so the server starts regardless of whether the platform honoured a nested install or a custom build command. Keep these versions in sync with server/package.json.",
+  "dependencies": {
+    "cors": "2.8.5",
+    "dotenv": "16.4.7",
+    "express": "4.21.2",
+    "socket.io": "4.8.1",
+    "viem": "2.21.55"
   },
   "devDependencies": {
     "concurrently": "9.1.0"
