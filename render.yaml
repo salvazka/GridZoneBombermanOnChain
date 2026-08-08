@@ -5,9 +5,10 @@ services:
     name: gridzone-server
     runtime: node
     plan: free
-    rootDir: server
-    buildCommand: npm install
-    startCommand: node src/index.js
+    # Root directory is intentionally left empty (repo root) because Render's
+    # root-dir handling is inconsistent between build and start commands.
+    buildCommand: cd server && npm install
+    startCommand: cd server && node src/index.js
     envVars:
       - key: PORT
         value: "10000"

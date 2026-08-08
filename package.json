@@ -5,6 +5,7 @@
   "description": "GridZone - Bomberman battle royale with instant on-chain USDC settlement on Monad",
   "scripts": {
     "install:all": "npm --prefix server install && npm --prefix client install",
+    "start": "node server/src/index.js",
     "dev": "concurrently -n server,client -c magenta,cyan \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
